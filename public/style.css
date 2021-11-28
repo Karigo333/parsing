@@ -1,0 +1,13 @@
+.card-text a {
+   color: brown !important;
+}
+
+
+.card-text a > u {
+   color: #fd0d0d; !important;
+}
+
+
+a {
+   color: #fd0d0d; !important;
+}

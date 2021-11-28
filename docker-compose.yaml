@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    depends_on:
+      - mysql
+    volumes:
+      - .:/var/www/html/app
+      - .docker/docker-php-ext-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    networks:
+      - app-net
+    environment:
+      PHP_IDE_CONFIG: "serverName=xdebug-docker"
+      XDEBUG_CONFIG: ${XDEBUG_CONFIG:-}
+
+  nginx:
+    image: nginx:1.17-alpine
+    depends_on:
+      - app
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www/html/app
+      - ./.docker/nginx:/etc/nginx/conf.d
+    networks:
+      - app-net
+  mysql:
+    image: mysql:5.7.34
+    networks:
+      - app-net
+    ports:
+      - 33066:3306
+    volumes:
+      - .docker/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=test_task
+      - MYSQL_ROOT_PASSWORD=secret
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    networks:
+      - app-net
+    ports:
+      - 8025:8025
+
+networks:
+  app-net:
+    driver: bridge
