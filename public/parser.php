@@ -4,6 +4,7 @@ require_once "../db/db_connect.php";
 
 
 
+
 $url = 'https://dailytargum.com/section/news';
 
 $ch = curl_init();
@@ -30,18 +31,18 @@ foreach ($match[0] as $item) {
 
     //title
     preg_match_all('#<h1[^>]+?>(.*?)</h1>#su', $page, $heading);
-    $heading = implode($heading[1]);
+    $heading = $heading[1][0];
 
     //date
     preg_match_all('#<time[^>]+?>(.*?)</time>#su', $page, $data);
-    $data = implode($data[1]);
+    $data = $data[1][0];
 
     //full_text
     preg_match_all('#p\s+[^>]*?class\s*=\s*(["\'])jsx-4083616078\1[^>]*?>(.*?)</p>#su', $page, $description);
-    $description = implode($description[2]);
+    $description = $description[2][0];
 
 
-    if(!check($db,$heading))
+    if(!check($heading))
     {
         $param = [
             'heading' => $heading,
@@ -51,7 +52,7 @@ foreach ($match[0] as $item) {
         ];
 
         $sql = "INSERT news (heading, image, description, data) VALUE (:heading, :image, :description, :data)";
-        $query = $db->prepare($sql);
+        $query = DB::query()->prepare($sql);
         $query->execute($param);
 
 
@@ -62,9 +63,12 @@ foreach ($match[0] as $item) {
 
     }
 }
-    function check($db,$head)
+
+
+
+    function check($head)
         {
-            $f = $db->prepare('select heading from news where heading like :heading');
+            $f = DB::query()->prepare('select heading from news where heading like :heading');
             $f->bindValue(':heading', $head);
             $f->execute();
             return $f->fetch();
